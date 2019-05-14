@@ -1,0 +1,59 @@
+from urllib.request import urlopen
+from random import randint
+
+
+def wordListSum(wordList):
+    sum = 0
+
+    for word ,value in wordList.items():
+        sum += value
+    return sum
+
+def retrieveRandomWord(wordList):
+    randIndex = randint(1,wordListSum(wordList))
+
+    for word ,value in wordList.items():
+        randIndex -= value
+        if randIndex <=0:
+            return word
+#建立word字典
+def buildWordDict(text):
+    #去除换行符
+    text = text.replace("\n", " ")
+    #去除“
+    text = text.replace("\"", " ")
+    #将, . : ;用空格分出来
+    punctuation = [',', '.', ';', ':']
+    for symbol in punctuation:
+        text = text.replace(symbol, " " + symbol +" ")
+    #以空格为字符切片
+    words = text.split(" ")
+    #去除空格字符
+    words = [word for word in words if word !=""]
+
+    #制造类一个二维字典
+    WordDict = {}
+    for i in range(1, len(words)):
+        #取词加入到字典中
+        if words[i-1] not in WordDict:
+            WordDict[words[i-1]] = {}
+        #取下一个词加入到字典的字典中
+        if words[i] not in WordDict[words[i-1]]:
+            WordDict[words[i-1]][words[i]] = 0
+
+        WordDict[words[i-1]][words[i]] = WordDict[words[i-1]][words[i]] + 1
+    return  WordDict
+
+#读取文章
+text = str(urlopen("http://pythonscraping.com/files/inaugurationSpeech.txt").read(),'utf-8')
+
+WordDict = buildWordDict(text)
+length = 100
+chain = ""
+currentWord = "I"
+
+for i in range(0, length):
+    chain += currentWord+" "
+    currentWord = retrieveRandomWord(WordDict[currentWord])
+
+print(chain)
